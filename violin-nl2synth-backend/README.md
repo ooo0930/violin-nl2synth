@@ -100,6 +100,22 @@
 
 ---
 
+## 2025/04/26 更新
+- 移除 app.listen，改由 server.ts 啟動，方便自動化測試
+- 修正 MIDI 產生 channel 型別錯誤
+- synthMapper 與所有 API 已通過 Jest/Supertest 全自動化測試
+- 建議：如需 CI/CD，可直接用 GitHub Actions 或 Netlify 部署
+
+---
+
+## 測試與部署
+- `npm test`：執行所有自動化測試
+- `npm run dev`：本地開發模式
+- `node src/server.js` 或 `ts-node src/server.ts`：正式啟動
+- 支援雲端部署（Netlify、Render、Railway）
+
+---
+
 # English Summary
 
 ## Overview

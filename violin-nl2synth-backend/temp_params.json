@@ -1,1 +1,1 @@
-[{"pitch":69,"duration":1,"velocity":60,"intensity":0.8,"bowPosition":"middle","vibrato":0.1},{"pitch":71,"duration":1,"velocity":70,"intensity":0.8,"bowPosition":"middle","vibrato":0.1},{"pitch":72,"duration":2,"velocity":90,"intensity":0.8,"bowPosition":"middle","vibrato":0.1}]
+[{"pitch":69,"velocity":80,"duration":1,"gain":1,"bowPosition":70,"vibrato":0.42,"resonance":0.5,"sharpness":0.5,"wetDry":0.5,"attack":1,"loopStart":0.5,"loopEnd":1,"pitchVariance":0}]

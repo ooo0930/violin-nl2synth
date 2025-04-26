@@ -5,20 +5,27 @@
   "main": "src/app.ts",
   "scripts": {
     "start": "ts-node src/app.ts",
-    "dev": "ts-node src/app.ts"
+    "dev": "ts-node src/app.ts",
+    "test": "jest"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "dotenv": "^16.3.1",
+    "@tonejs/midi": "^2.0.28",
     "ajv": "^8.12.0",
     "axios": "^1.6.7",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "winston": "^3.13.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.11.30",
+    "@types/supertest": "^6.0.3",
     "@types/winston": "^2.4.4",
-    "typescript": "^5.4.5",
-    "ts-node": "^10.9.2"
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0",
+    "ts-jest": "^29.3.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

@@ -76,6 +76,20 @@
 
 ---
 
+## 2025/04/26 狀態整理
+- React/Vite 前端，API 串接穩定
+- 建議加上 @testing-library/react + Jest 進行自動化測試
+- 可用 npm run build 產生靜態檔，部署 Netlify/Vercel
+- 若需自動化測試，請於 package.json 加入 test script
+
+---
+
+## 近期更新
+- 增加 package.json test script 提示
+- 補充 README 啟動/測試/部署說明
+
+---
+
 # English Summary
 
 ## Overview

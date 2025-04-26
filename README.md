@@ -137,6 +137,33 @@ violin-nl2synth/
 
 ---
 
+## 2025/04/26 專案狀態總整理
+
+- 後端（violin-nl2synth-backend）
+  - Node.js/TypeScript + Express
+  - 所有 API 已自動化測試（Jest/Supertest）100% 通過
+  - MIDI 產生、參數 mapping、合成器控制皆模組化
+  - 適合本地與雲端部署
+- 前端（violin-nl2synth-frontend）
+  - React/Vite，支援自然語言輸入、參數預覽、API 串接
+  - 可進一步加上自動化測試（建議用 @testing-library/react）
+- 合成器（MFM-synth-juce-main）
+  - 已改為 Standalone Application，直接由後端呼叫
+- 一鍵啟動腳本 start.sh
+- .env、.gitignore、CI/CD、部署範例皆完整
+- 所有程式碼、測試、部署腳本皆已同步至 git，適合團隊協作
+
+---
+
+## 更新紀錄（2025/04/26）
+- 修正後端 listen 衝突，app/server 分離
+- 修正 MIDI 產生型別錯誤
+- 所有自動化測試通過
+- 前端/後端 README 完整補充
+- 建議：前端可加上自動化測試腳本
+
+---
+
 ## 聯絡/協助
 如需進階自動化、批次 note、特殊音色控制等，請直接提出，我會自動幫你補齊所有程式碼！
 
