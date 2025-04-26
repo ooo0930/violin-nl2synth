@@ -50,6 +50,75 @@
 
 ---
 
+## 全自動 LLM 小提琴生成流程
+
+本專案已支援「一鍵自然語言生成 AI 小提琴音樂」全自動流程，串接 Hugging Face 免費 LLM，無須 OpenAI 金鑰。
+
+### 系統流程圖
+
+```
+[任何自然語言]
+      │
+      ▼
+/translate (LLM)
+      │
+      ▼
+[小提琴能演奏的音樂描述]
+      │
+      ▼
+/describe2notes (LLM)
+      │
+      ▼
+[音符陣列]
+      │
+      ▼
+/parametrize
+      │
+      ▼
+[MIDI 參數]
+      │
+      ▼
+[產生 MIDI 檔案]
+      │
+      ▼
+/violin_full.mid（下載/播放）
+```
+
+---
+
+### 一鍵生成 API
+
+- **POST** `/full`
+- **Body 範例：**
+```json
+{
+  "description": "下雨天的溫柔心情"
+}
+```
+- **回傳：**
+```json
+{
+  "musicDescription": "抒情的C大調小提琴旋律，節奏中等，情感豐富",
+  "notes": [
+    { "pitch": 69, "duration": 1.2, "velocity": 60 },
+    ...
+  ],
+  "params": [ ... ],
+  "midiUrl": "/violin_full.mid"
+}
+```
+
+---
+
+### 主要 API 說明
+
+- `/translate`：自然語言 → 小提琴能演奏的音樂描述（LLM）
+- `/describe2notes`：音樂描述 → 音符陣列（LLM）
+- `/parametrize`：音符陣列 → 合成器參數
+- `/full`：一鍵串接所有流程，回傳描述、音符、參數與 MIDI 檔案網址
+
+---
+
 ## 參數 mapping 說明
 - 參數自動對應於 `src/synthMapper.ts`，支援所有 MFM-synth-juce-main 主要參數（pitch, velocity, duration, gain, bowPosition, vibrato, resonance, sharpness...）。
 - 如需擴充 mapping 或支援特殊音色，只需修改 synthMapper.ts。
@@ -100,8 +169,25 @@
 
 ---
 
-## 2025/04/26 更新
-- 移除 app.listen，改由 server.ts 啟動，方便自動化測試
+## 本地測試
+
+1. 啟動 backend server
+2. 用 Postman 或 curl 呼叫 `/full`，即可一鍵取得 AI 生成小提琴 MIDI
+3. 下載 `/violin_full.mid` 播放
+
+---
+
+## LLM 免費串接
+
+- 本專案預設使用 Hugging Face 免費 LLM API，無需付費。
+- 如需高品質或即時性，可改用 OpenAI。
+
+---
+
+## 更新紀錄
+
+- 2025/04/26：新增全自動 `/full` API，三層式 LLM 音樂生成流程，README 完整更新。
+- 2025/04/26：移除 app.listen，改由 server.ts 啟動，方便自動化測試
 - 修正 MIDI 產生 channel 型別錯誤
 - synthMapper 與所有 API 已通過 Jest/Supertest 全自動化測試
 - 建議：如需 CI/CD，可直接用 GitHub Actions 或 Netlify 部署
