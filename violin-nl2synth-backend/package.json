@@ -5,7 +5,10 @@
   "main": "src/app.ts",
   "scripts": {
     "start": "ts-node src/app.ts",
-    "dev": "ts-node src/app.ts",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "ts-node src/app.ts",
+    "dev:frontend": "cd ../violin-nl2synth-frontend && npm run dev",
+    "open": "npm run dev & node scripts/open-browser.js",
     "test": "jest"
   },
   "dependencies": {
@@ -24,6 +27,7 @@
     "@types/node-fetch": "^2.6.12",
     "@types/supertest": "^6.0.3",
     "@types/winston": "^2.4.4",
+    "concurrently": "^7.5.0",
     "jest": "^29.7.0",
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.2",

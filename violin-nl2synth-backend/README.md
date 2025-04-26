@@ -55,6 +55,20 @@
 
 ---
 
+## 一鍵開啟
+
+只需執行以下指令，即可同時啟動後端、前端並自動打開瀏覽器：
+
+```bash
+npm install
+npm run open
+```
+
+- 支援 Mac（open）、Linux（xdg-open）、Windows（start）自動開啟 http://localhost:5173
+- 若首次使用，請先於專案根目錄下執行 `npm install concurrently` 安裝依賴
+
+---
+
 ## 主要 API
 
 - `POST /translate`：自然語言 → 小提琴語言
