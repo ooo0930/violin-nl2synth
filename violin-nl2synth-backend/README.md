@@ -125,6 +125,56 @@
 
 ---
 
+## 參數字典優化與雙層控制
+
+本專案已參考 MFM-synth-juce-main，將參數分為兩大類：
+
+- **MIDI 參數**：pitch, duration, velocity
+- **合成器參數**（物理建模）：bowPosition, gain, vibrato, resonance, sharpness, articulation, intensity ...
+
+所有合成器參數定義於 `src/config/synthParamDictionary.json`，每個參數有範圍、預設值與語意說明。
+
+### 字典自動 mapping 流程
+
+```
+[自然語言]
+   │
+   ▼
+[LLM] → [音樂描述]
+   │
+   ├── [LLM/Mapping] → [MIDI 參數]
+   │
+   └── [字典 mapping] → [合成器參數]
+   │
+   ▼
+[產生 MIDI 檔] + [合成器參數 JSON]
+```
+
+### /full API 新增輸出
+
+- `musicDescription`：結構化音樂語意
+- `midiParams`：MIDI 控制參數（陣列）
+- `synthParams`：合成器物理參數（字典，依據 MFM-synth-juce-main）
+- `midiUrl`：MIDI 檔案下載連結
+
+---
+
+### 參數字典檔案
+
+- `src/config/synthParamDictionary.json`：所有合成器參數的範圍、預設值與說明
+
+---
+
+### 字典 mapping 範例
+
+- 「激烈」→ intensity=0.95, gain=0.95, vibrato=0.7, articulation=0.8
+- 「柔和」→ intensity=0.5, gain=0.6, vibrato=0.2, articulation=0.2
+- 「顫音」→ vibrato=0.9
+- 「明亮」→ sharpness=0.9, resonance=0.7
+- 「厚重」→ sharpness=0.2, resonance=0.9
+
+---
+
 ## 環境變數
 - `.env` 檔必須設定：
   - `SYNTH_PATH`：C++ 合成器執行檔路徑
@@ -158,6 +208,7 @@
 ## 近期重大變動
 - 新增 MIDI 產生 API
 - 文件補充雲端部署與流程
+- 新增參數字典優化與雙層控制說明
 
 ---
 
@@ -191,6 +242,7 @@
 - 修正 MIDI 產生 channel 型別錯誤
 - synthMapper 與所有 API 已通過 Jest/Supertest 全自動化測試
 - 建議：如需 CI/CD，可直接用 GitHub Actions 或 Netlify 部署
+- 2025/04/26：新增 synthParamDictionary.json，參數分層 mapping，/full API 同時輸出 midiParams 與 synthParams，方便雙層控制。
 
 ---
 

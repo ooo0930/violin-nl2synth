@@ -1,0 +1,37 @@
+{
+  "bowPosition": {
+    "range": [0, 1],
+    "default": 0.5,
+    "description": "弓在弦上的位置，0=靠近指板，1=靠近琴橋"
+  },
+  "gain": {
+    "range": [0, 1],
+    "default": 0.8,
+    "description": "音量增益"
+  },
+  "vibrato": {
+    "range": [0, 1],
+    "default": 0.2,
+    "description": "顫音強度"
+  },
+  "resonance": {
+    "range": [0, 1],
+    "default": 0.5,
+    "description": "共鳴程度"
+  },
+  "sharpness": {
+    "range": [0, 1],
+    "default": 0.5,
+    "description": "音色銳利度"
+  },
+  "articulation": {
+    "range": [0, 1],
+    "default": 0.5,
+    "description": "演奏法（0=legato, 1=staccato）"
+  },
+  "intensity": {
+    "range": [0, 1],
+    "default": 0.7,
+    "description": "演奏強度"
+  }
+}

@@ -6,7 +6,7 @@ import { llmTranslateWithRetry } from './llmTranslator';
 import { validateAndFillSynthParams } from './paramMapper';
 import { playSynthFromJson } from './synthDriver';
 import { logger } from './logger';
-import { mapToSynthFormat } from './synthMapper';
+import { mapToSynthFormat, mapDescriptionToSynthParams } from './synthMapper';
 import { generateViolinMidi } from './midiGenerator';
 import path from 'path';
 
@@ -121,7 +121,7 @@ app.post('/midi', async (req, res) => {
   }
 });
 
-// ====== 全自動：自然語言→描述→音符→參數→MIDI ======
+// ====== 全自動：自然語言→描述→音符→參數→MIDI（字典優化） ======
 app.post('/full', async (req, res) => {
   try {
     const { description } = req.body;
@@ -135,16 +135,22 @@ app.post('/full', async (req, res) => {
       { pitch: 71, duration: 1.0, velocity: 70 },
       { pitch: 72, duration: 2.0, velocity: 90 }
     ]);
-    // 3. 音符陣列 → 參數
-    const params = validateAndFillSynthParams(notes);
-    // 4. 產生 MIDI
+    // 3. 音符陣列 → MIDI 參數
+    const midiParams = notes.map((n: any) => ({
+      pitch: n.pitch,
+      duration: n.duration,
+      velocity: n.velocity
+    }));
+    // 4. 音樂描述 → 合成器參數（字典優化）
+    const synthParams = mapDescriptionToSynthParams(musicDescription);
+    // 5. 產生 MIDI
     const outPath = path.join(__dirname, '../public/violin_full.mid');
-    await generateViolinMidi(params, outPath);
-    // 5. 回傳所有資訊
+    await generateViolinMidi(midiParams, outPath);
+    // 6. 回傳所有資訊
     res.json({
       musicDescription,
-      notes,
-      params,
+      midiParams,
+      synthParams,
       midiUrl: '/violin_full.mid'
     });
   } catch (e) {
