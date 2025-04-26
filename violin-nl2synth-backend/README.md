@@ -34,15 +34,32 @@
 ---
 
 ## 主要 API
-- `/translate`：自然語言 → 小提琴語言
-- `/parametrize`：小提琴語言 → 合成器參數（已自動 mapping）
-- `/play`：將參數寫入 JSON，呼叫合成器執行檔自動播放
+
+- `POST /translate`：自然語言 → 小提琴語言
+  - 輸入： `{ description: "演奏一段溫柔的小提琴旋律" }`
+  - 回傳： `[{ pitch: 69, duration: 1.0, velocity: 60 }, ...]`
+- `POST /parametrize`：小提琴語言 → 合成器參數（自動 mapping）
+  - 輸入： `[ { pitch, duration, velocity, ... } ]`
+  - 回傳： `[ { pitch, duration, velocity, intensity, bowPosition, vibrato, ... } ]`
+- `POST /play`：將參數寫入 JSON，呼叫合成器執行檔自動播放
+  - 輸入： `[ { pitch, duration, velocity, ... } ]`
+  - 回傳： `{ status: "playing" }`
+- `POST /midi`：自動產生四小節小提琴旋律 MIDI 檔，回傳下載網址
+  - 適合雲端部署，不需本地 C++ 執行檔
+  - 產生的 MIDI 檔可用任何播放器或 JS 於前端播放
 
 ---
 
 ## 參數 mapping 說明
 - 參數自動對應於 `src/synthMapper.ts`，支援所有 MFM-synth-juce-main 主要參數（pitch, velocity, duration, gain, bowPosition, vibrato, resonance, sharpness...）。
 - 如需擴充 mapping 或支援特殊音色，只需修改 synthMapper.ts。
+
+---
+
+## 環境變數
+- `.env` 檔必須設定：
+  - `SYNTH_PATH`：C++ 合成器執行檔路徑
+  - （如需 LLM，可加 `OPENAI_API_KEY` 等）
 
 ---
 
@@ -54,14 +71,52 @@
 
 ---
 
+## 雲端部署教學
+- 推薦 Render 部署 backend，支援 Node.js/Express，免費方案可用
+- 註冊 https://render.com/，新建 Web Service，連結 GitHub，啟動指令 `npm run dev`
+- 設定 public 目錄供 MIDI 檔下載
+- `.env` 僅需設定必要變數，不需 SYNTH_PATH
+
+---
+
+## MIDI 流程
+1. 前端送出自然語言描述
+2. 後端 `/midi` API 產生四小節小提琴旋律 MIDI
+3. 回傳下載網址，前端可直接下載或播放
+
+---
+
+## 近期重大變動
+- 新增 MIDI 產生 API
+- 文件補充雲端部署與流程
+
+---
+
 ## 常見問題
 - **合成器無聲音/錯誤？**
   - 請檢查 .env 路徑、參數格式與 build log，或將錯誤訊息貼給我協助。
 - **如何擴充 mapping？**
   - 修改 `src/synthMapper.ts` 即可。
-- **如何支援和弦/多音？**
-  - 調整 JSON 結構與 C++ play()，即可支援批量 note。
 
 ---
 
-如需進階自動化、批次 note、特殊音色控制等，請直接提出，我會自動幫你補齊所有程式碼！
+# English Summary
+
+## Overview
+This backend receives natural language, translates it to violin note arrays, maps to synthesizer parameters, and triggers a JUCE-based standalone synthesizer. See `.env` for synth path config.
+
+## Quick Start
+1. Install dependencies: `npm install`
+2. Set `SYNTH_PATH` in `.env`
+3. Run: `npm run dev`
+
+## Main Endpoints
+- `POST /translate`: NL → notes
+- `POST /parametrize`: notes → synth params
+- `POST /play`: trigger synth
+- `POST /midi`: generate MIDI file
+
+## Env Vars
+- `SYNTH_PATH`: Path to synth executable
+
+---
