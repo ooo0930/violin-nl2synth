@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "violin-nl2synth-frontend/dist/**", "use": "@vercel/static" },
+    { "src": "violin-nl2synth-backend/src/api/*.ts", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "violin-nl2synth-backend/src/api/$1.ts" },
+    { "src": "/(.*)", "dest": "violin-nl2synth-frontend/dist/$1" }
+  ]
+}
