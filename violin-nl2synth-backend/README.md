@@ -31,7 +31,7 @@
 ---
 
 ## 技術棧
-- Node.js 18+/TypeScript
+- Node.js 18+ / TypeScript
 - Express
 - OpenAI/HuggingFace LLM API
 - C++/JUCE Standalone 合成器（由 SYNTH_PATH 指定）
@@ -59,16 +59,29 @@
 
 - `POST /translate`：自然語言 → 小提琴語言
   - 輸入： `{ description: "演奏一段溫柔的小提琴旋律" }`
-  - 回傳： `[{ pitch: 69, duration: 1.0, velocity: 60 }, ...]`
-- `POST /parametrize`：小提琴語言 → 合成器參數（自動 mapping）
-  - 輸入： `[ { pitch, duration, velocity, ... } ]`
-  - 回傳： `[ { pitch, duration, velocity, intensity, bowPosition, vibrato, ... } ]`
-- `POST /play`：將參數寫入 JSON，呼叫合成器執行檔自動播放
-  - 輸入： `[ { pitch, duration, velocity, ... } ]`
-  - 回傳： `{ status: "playing" }`
-- `POST /midi`：自動產生四小節小提琴旋律 MIDI 檔，回傳下載網址
-  - 適合雲端部署，不需本地 C++ 執行檔
-  - 產生的 MIDI 檔可用任何播放器或 JS 於前端播放
+  - 回傳： `{ musicDescription: "一段溫柔的C大調旋律..." }`
+
+- `POST /describe2notes`：小提琴語言 → 音符陣列
+  - 輸入： `{ musicDescription: "一段溫柔的C大調旋律..." }`
+  - 回傳： `[{ pitch: 69, duration: 1.2, velocity: 60 }, ...]`
+
+- `POST /parametrize`：音符陣列 → 合成器參數（自動補全）
+  - 輸入： `[{ pitch: 69, duration: 1.2, velocity: 60 }]`
+  - 回傳： `[{ pitch: 69, duration: 1.2, velocity: 60, intensity: 0.6, bowPosition: "middle", vibrato: 0.15 }, ...]`
+
+- `POST /full`：自然語言 → 音樂描述 → 音符 → 參數 → MIDI（全自動）
+  - 輸入： `{ description: "演奏一段激烈的小提琴旋律" }`
+  - 回傳： `{ musicDescription, midiParams, synthParams, midiUrl }`
+
+---
+
+## 參數映射與 config 說明
+
+- `src/config/synthParamDictionary.json`：定義所有合成器參數的範圍、預設值與語意（若不存在，請建立並參考程式碼邏輯）。
+- `/parametrize` 會自動補全：
+  - `intensity`（根據 velocity 或描述）
+  - `bowPosition`（預設 middle，可依描述調整）
+  - `vibrato`（根據描述或隨機微調）
 
 ---
 
@@ -132,18 +145,12 @@
 
 ---
 
-### 主要 API 說明
+## 主要 API 說明
 
 - `/translate`：自然語言 → 小提琴能演奏的音樂描述（LLM）
 - `/describe2notes`：音樂描述 → 音符陣列（LLM）
 - `/parametrize`：音符陣列 → 合成器參數
 - `/full`：一鍵串接所有流程，回傳描述、音符、參數與 MIDI 檔案網址
-
----
-
-## 參數 mapping 說明
-- 參數自動對應於 `src/synthMapper.ts`，支援所有 MFM-synth-juce-main 主要參數（pitch, velocity, duration, gain, bowPosition, vibrato, resonance, sharpness...）。
-- 如需擴充 mapping 或支援特殊音色，只需修改 synthMapper.ts。
 
 ---
 
@@ -181,13 +188,13 @@
 
 ---
 
-### 參數字典檔案
+## 參數字典檔案
 
 - `src/config/synthParamDictionary.json`：所有合成器參數的範圍、預設值與說明
 
 ---
 
-### 標準參數格式
+## 標準參數格式
 
 #### JSON Schema（含 default）
 
@@ -216,7 +223,7 @@
 
 ---
 
-### 錯誤重試與 Fallback
+## 錯誤重試與 Fallback
 
 - 本系統呼叫 LLM（如 Hugging Face API）時，若未回傳合法 JSON，會自動重試最多 3 次。
 - 若多次仍失敗，將回傳預設旋律：
@@ -229,7 +236,7 @@
 
 ---
 
-### 性能監控與延遲量測
+## 性能監控與延遲量測
 
 - 可於 Node.js 內部加入計時程式碼監控 API 延遲：
   ```js
@@ -246,66 +253,6 @@
   // 自動產生 /metrics endpoint，供 Prometheus 抓取
   ```
 - 可追蹤如 API 延遲、請求次數等指標。
-
----
-
-### 專案結構
-
-- `config/`：存放所有參數字典、Schema 等設定檔案，便於集中管理。
-- `scripts/`：各類啟動、測試或資料轉換腳本，方便自動化與維護。
-
----
-
-### 前端相容性與 UX
-
-- 支援響應式設計，於 480px、768px、1024px 及以上斷點自動調整排版。
-- 已於下列主流瀏覽器測試通過：
-  - Chrome（最新版）
-  - Firefox
-  - Safari
-  - Edge
-  - 行動裝置瀏覽器（iOS、Android）
-
----
-
-## 前後端/聲音全流程對接
-
-### 前端（violin-nl2synth-frontend）
-- 只需呼叫 `/full` API，輸入自然語言描述，即可取得：
-  - `musicDescription`（結構化音樂語意）
-  - `midiParams`（MIDI 參數陣列）
-  - `synthParams`（合成器物理參數字典）
-  - `midiUrl`（MIDI 檔案下載連結）
-- 介面同時顯示所有參數與 MIDI 下載連結，方便人工或自動傳遞給合成器。
-
-### 後端（violin-nl2synth-backend）
-- `/full` API：自動串接 LLM → 音樂描述 → 音符 → 參數 mapping → MIDI 產生。
-- `synthParamDictionary.json`：定義所有合成器參數範圍、預設值與語意。
-- `mapDescriptionToSynthParams`：根據描述自動產生物理參數，並可擴充規則。
-- `generateViolinMidi`：產生 MIDI 檔案，支援下載。
-- `playSynthFromJson`：可將參數 JSON 傳遞給本地 MFM-synth-juce-main 合成器。
-
-### 聲音合成對接
-- 下載 MIDI 檔後，可用 DAW 或其他音源播放。
-- 若需直接物理合成，將 `synthParams` 轉為 JSON，傳給 MFM-synth-juce-main 執行檔（路徑由 .env 設定 SYNTH_PATH）。
-- 範例指令：`SYNTH_PATH=path/to/MFM-synth-juce-main ./MFM-synth-juce-main synthParams.json`
-
-### 端到端流程圖
-
-```
-[前端輸入]
-   │
-   ▼
-[POST /full]
-   │
-   ├──> musicDescription
-   ├──> midiParams
-   ├──> synthParams
-   └──> midiUrl
-   │
-   ▼
-[下載 MIDI 或傳參數給合成器]
-```
 
 ---
 
