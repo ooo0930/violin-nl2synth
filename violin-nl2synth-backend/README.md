@@ -165,13 +165,84 @@
 
 ---
 
-### 字典 mapping 範例
+### 標準參數格式
 
-- 「激烈」→ intensity=0.95, gain=0.95, vibrato=0.7, articulation=0.8
-- 「柔和」→ intensity=0.5, gain=0.6, vibrato=0.2, articulation=0.2
-- 「顫音」→ vibrato=0.9
-- 「明亮」→ sharpness=0.9, resonance=0.7
-- 「厚重」→ sharpness=0.2, resonance=0.9
+#### JSON Schema（含 default）
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "pitch": { "type": "integer" },
+      "duration": { "type": "number" },
+      "velocity": { "type": "integer" },
+      "intensity": { "type": "number", "default": 0.8 },
+      "bowPosition": { "type": "string", "default": "middle" },
+      "vibrato": { "type": "number", "default": 0.1 },
+      "resonance": { "type": "number", "default": 0.5 },
+      "sharpness": { "type": "number", "default": 0.5 },
+      "articulation": { "type": "number", "default": 0.5 },
+      "gain": { "type": "number", "default": 0.8 }
+    },
+    "required": ["pitch", "duration", "velocity"]
+  }
+}
+```
+
+---
+
+### 錯誤重試與 Fallback
+
+- 本系統呼叫 LLM（如 Hugging Face API）時，若未回傳合法 JSON，會自動重試最多 3 次。
+- 若多次仍失敗，將回傳預設旋律：
+  ```json
+  [
+    { "pitch": 60, "duration": 1.0, "velocity": 80 }
+  ]
+  ```
+- 詳細策略請參見 `llmTranslateWithRetry` 實作，確保服務穩定不中斷。
+
+---
+
+### 性能監控與延遲量測
+
+- 可於 Node.js 內部加入計時程式碼監控 API 延遲：
+  ```js
+  const start = process.hrtime();
+  // ... 業務邏輯 ...
+  const [sec, nano] = process.hrtime(start);
+  const ms = sec * 1000 + nano / 1e6;
+  console.log(`API 執行時間: ${ms} ms`);
+  ```
+- 若需外部監控，建議整合 Prometheus，於 backend 加入 `/metrics` 路徑：
+  ```js
+  import promBundle from "express-prom-bundle";
+  app.use(promBundle({ includeMethod: true }));
+  // 自動產生 /metrics endpoint，供 Prometheus 抓取
+  ```
+- 可追蹤如 API 延遲、請求次數等指標。
+
+---
+
+### 專案結構
+
+- `config/`：存放所有參數字典、Schema 等設定檔案，便於集中管理。
+- `scripts/`：各類啟動、測試或資料轉換腳本，方便自動化與維護。
+
+---
+
+### 前端相容性與 UX
+
+- 支援響應式設計，於 480px、768px、1024px 及以上斷點自動調整排版。
+- 已於下列主流瀏覽器測試通過：
+  - Chrome（最新版）
+  - Firefox
+  - Safari
+  - Edge
+  - 行動裝置瀏覽器（iOS、Android）
 
 ---
 
@@ -297,26 +368,3 @@
 - `npm run dev`：本地開發模式
 - `node src/server.js` 或 `ts-node src/server.ts`：正式啟動
 - 支援雲端部署（Netlify、Render、Railway）
-
----
-
-# English Summary
-
-## Overview
-This backend receives natural language, translates it to violin note arrays, maps to synthesizer parameters, and triggers a JUCE-based standalone synthesizer. See `.env` for synth path config.
-
-## Quick Start
-1. Install dependencies: `npm install`
-2. Set `SYNTH_PATH` in `.env`
-3. Run: `npm run dev`
-
-## Main Endpoints
-- `POST /translate`: NL → notes
-- `POST /parametrize`: notes → synth params
-- `POST /play`: trigger synth
-- `POST /midi`: generate MIDI file
-
-## Env Vars
-- `SYNTH_PATH`: Path to synth executable
-
----
