@@ -4,11 +4,11 @@
   "description": "Violin Natural Language to Synthesizer Backend",
   "main": "src/app.ts",
   "scripts": {
-    "start": "ts-node src/app.ts",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "ts-node src/app.ts",
     "dev:frontend": "cd ../violin-nl2synth-frontend && npm run dev",
-    "open": "npm run dev & node scripts/open-browser.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "open": "npm run dev & (uname | grep -q Darwin && open http://localhost:5173 || uname | grep -q Linux && xdg-open http://localhost:5173 || start http://localhost:5173)",
+    "start": "ts-node src/app.ts",
     "test": "jest"
   },
   "dependencies": {
