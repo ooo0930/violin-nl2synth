@@ -175,6 +175,47 @@
 
 ---
 
+## 前後端/聲音全流程對接
+
+### 前端（violin-nl2synth-frontend）
+- 只需呼叫 `/full` API，輸入自然語言描述，即可取得：
+  - `musicDescription`（結構化音樂語意）
+  - `midiParams`（MIDI 參數陣列）
+  - `synthParams`（合成器物理參數字典）
+  - `midiUrl`（MIDI 檔案下載連結）
+- 介面同時顯示所有參數與 MIDI 下載連結，方便人工或自動傳遞給合成器。
+
+### 後端（violin-nl2synth-backend）
+- `/full` API：自動串接 LLM → 音樂描述 → 音符 → 參數 mapping → MIDI 產生。
+- `synthParamDictionary.json`：定義所有合成器參數範圍、預設值與語意。
+- `mapDescriptionToSynthParams`：根據描述自動產生物理參數，並可擴充規則。
+- `generateViolinMidi`：產生 MIDI 檔案，支援下載。
+- `playSynthFromJson`：可將參數 JSON 傳遞給本地 MFM-synth-juce-main 合成器。
+
+### 聲音合成對接
+- 下載 MIDI 檔後，可用 DAW 或其他音源播放。
+- 若需直接物理合成，將 `synthParams` 轉為 JSON，傳給 MFM-synth-juce-main 執行檔（路徑由 .env 設定 SYNTH_PATH）。
+- 範例指令：`SYNTH_PATH=path/to/MFM-synth-juce-main ./MFM-synth-juce-main synthParams.json`
+
+### 端到端流程圖
+
+```
+[前端輸入]
+   │
+   ▼
+[POST /full]
+   │
+   ├──> musicDescription
+   ├──> midiParams
+   ├──> synthParams
+   └──> midiUrl
+   │
+   ▼
+[下載 MIDI 或傳參數給合成器]
+```
+
+---
+
 ## 環境變數
 - `.env` 檔必須設定：
   - `SYNTH_PATH`：C++ 合成器執行檔路徑
@@ -209,6 +250,7 @@
 - 新增 MIDI 產生 API
 - 文件補充雲端部署與流程
 - 新增參數字典優化與雙層控制說明
+- README 補充前後端與聲音端到端對接細節、全自動 API 流程、參數傳遞與合成器連動說明
 
 ---
 
@@ -243,6 +285,10 @@
 - synthMapper 與所有 API 已通過 Jest/Supertest 全自動化測試
 - 建議：如需 CI/CD，可直接用 GitHub Actions 或 Netlify 部署
 - 2025/04/26：新增 synthParamDictionary.json，參數分層 mapping，/full API 同時輸出 midiParams 與 synthParams，方便雙層控制。
+- 2025/04/26 再次檢查與全流程優化
+- 前端只用 /full API，參數與聲音檔案一站式取得
+- README 補充前後端與聲音對接細節與流程圖
+- 建議：如需自動化測試，請參考 test/api.test.ts
 
 ---
 

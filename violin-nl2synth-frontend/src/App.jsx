@@ -8,23 +8,25 @@ function App() {
   const [status, setStatus] = useState("");
   const [paramPreview, setParamPreview] = useState(null); // 參數預覽
 
-  const handleSubmit = async (e) => {
+  // ====== 新增全自動 /full API 流程 ======
+  const handleFullAuto = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setStatus("");
     setParamPreview(null);
     try {
-      // 1. 轉譯自然語言 → 小提琴語言
-      const transRes = await axios.post("/translate", {
-        description,
+      const res = await axios.post("/full", { description });
+      setParamPreview({
+        音樂描述: res.data.musicDescription,
+        MIDI參數: res.data.midiParams,
+        合成器參數: res.data.synthParams,
       });
-      // 2. 小提琴語言 → 合成器參數
-      const paramRes = await axios.post("/parametrize", transRes.data);
-      setParamPreview(paramRes.data); // 顯示參數預覽
-      // 3. 送入合成器播放
-      const playRes = await axios.post("/play", paramRes.data);
-      setStatus(playRes.data.status || "已觸發播放");
+      setStatus(
+        <span>
+          MIDI 已生成：<a href={res.data.midiUrl} target="_blank" rel="noopener noreferrer">下載 MIDI</a>
+        </span>
+      );
     } catch (err) {
       setError(err.response?.data?.detail || err.message);
     } finally {
@@ -35,7 +37,7 @@ function App() {
   return (
     <div style={{ maxWidth: 480, margin: "40px auto", fontFamily: "sans-serif" }}>
       <h2>小提琴 AI 合成器</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleFullAuto}>
         <textarea
           rows={4}
           style={{ width: "100%", fontSize: 16 }}
@@ -45,7 +47,7 @@ function App() {
           disabled={loading}
         />
         <button type="submit" style={{ marginTop: 12 }} disabled={loading || !description}>
-          {loading ? "處理中..." : "生成並播放"}
+          {loading ? "處理中..." : "全自動生成 MIDI 與參數"}
         </button>
       </form>
       {paramPreview && (
@@ -57,7 +59,7 @@ function App() {
       {status && <div style={{ color: "green", marginTop: 16 }}>{status}</div>}
       {error && <div style={{ color: "red", marginTop: 16 }}>錯誤：{error}</div>}
       <div style={{ marginTop: 32, color: "#888" }}>
-        <b>說明：</b> 本系統將自然語言描述轉為小提琴合成演奏，僅供展演參考。
+        <b>說明：</b> 本系統將自然語言描述轉為小提琴 MIDI 與物理參數，可下載 MIDI 檔並傳遞參數給合成器。
       </div>
     </div>
   );
