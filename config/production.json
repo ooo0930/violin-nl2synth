@@ -1,0 +1,6 @@
+{
+  "openaiApiKey": "${OPENAI_API_KEY}",
+  "port": 80,
+  "defaultBowPosition": 70.0,
+  "defaultVibrato": 0.4
+}

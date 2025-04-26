@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "pitch": { "type": "integer" },
+      "duration": { "type": "number" },
+      "velocity": { "type": "integer" },
+      "intensity": { "type": "number", "default": 0.8 },
+      "bowPosition": { "type": "string", "default": "middle" },
+      "vibrato": { "type": "number", "default": 0.1 }
+    },
+    "required": ["pitch", "duration", "velocity"]
+  }
+}
